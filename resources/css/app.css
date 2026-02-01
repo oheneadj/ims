@@ -1,0 +1,38 @@
+@import 'filepond/dist/filepond.css';
+@import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+@import "tailwindcss";
+
+@plugin "flyonui";
+@plugin "@iconify/tailwind4";
+
+@import "flyonui/src/vendor/apexcharts.css";
+
+@source "../../node_modules/flyonui/dist/index.js";
+
+@source "../**/*.blade.php";
+@source "../**/*.js";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Doniel Luxe Brown/Bronze Theme */
+    --color-brand-50: #fdf8f3;
+    --color-brand-100: #f9eee0;
+    --color-brand-200: #f2dcc0;
+    --color-brand-300: #e9c596;
+    --color-brand-400: #dea86a;
+    --color-brand-500: #d4914a;
+    --color-brand-600: #c67a3f;
+    --color-brand-700: #a56035;
+    --color-brand-800: #854d31;
+    --color-brand-900: #6b412a;
+    --color-brand-950: #3a1f14;
+}
+
+/* Fix for dropdown visibility when open */
+.dropdown.open>.dropdown-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
