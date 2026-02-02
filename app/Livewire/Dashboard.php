@@ -180,10 +180,7 @@ class Dashboard extends Component
         $this->orderByCategoryData = $stats->pluck('total_qty')->toArray();
 
         // 14. Top Customers by Amount Spent
-        $this->topCustomers = \App\Models\Customer::select('customers.*')
-            ->selectRaw('COALESCE(SUM(sales.total_amount), 0) as total_spent')
-            ->leftJoin('sales', 'customers.id', '=', 'sales.customer_id')
-            ->groupBy('customers.id')
+        $this->topCustomers = \App\Models\Customer::withSum('sales as total_spent', 'total_amount')
             ->orderByDesc('total_spent')
             ->take(5)
             ->get();
