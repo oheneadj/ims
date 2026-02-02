@@ -20,8 +20,8 @@ class CreateProduct extends Component
     #[Validate('required|unique:products,sku')]
     public string $sku = '';
 
-    #[Validate('required')]
-    public string $type = '';
+    #[Validate('required|exists:categories,id')]
+    public $category_id = '';
 
     #[Validate('nullable')]
     public string $material = '';
@@ -43,11 +43,11 @@ class CreateProduct extends Component
 
     public function mount()
     {
-        $this->type = ProductType::NECKLACE->value;
+        // $this->category_id = ...; // Optional: set default
         $this->generateSku();
     }
 
-    public function updatedType()
+    public function updatedCategoryId()
     {
         $this->generateSku();
     }
@@ -59,11 +59,19 @@ class CreateProduct extends Component
 
     public function generateSku()
     {
-        $typePrefix = strtoupper(substr($this->type, 0, 3));
+        $catPrefix = 'GEN';
+        if ($this->category_id) {
+            $category = \App\Models\Category::find($this->category_id);
+            if ($category) {
+                // Use first 3 letters of slug or name
+                $catPrefix = strtoupper(substr($category->slug, 0, 3));
+            }
+        }
+        
         $materialPrefix = $this->material ? strtoupper(substr($this->material, 0, 3)) : 'GEN';
         $uniqueId = strtoupper(substr(uniqid(), -4));
 
-        $this->sku = "{$typePrefix}-{$materialPrefix}-{$uniqueId}";
+        $this->sku = "{$catPrefix}-{$materialPrefix}-{$uniqueId}";
     }
 
     public function save()
@@ -71,11 +79,18 @@ class CreateProduct extends Component
         $this->validate();
 
         $path = $this->photo ? $this->photo->store('products', 'public') : null;
+        
+        // Backward compatibility: Determine legacy 'type' from category if possible
+        $category = \App\Models\Category::find($this->category_id);
+        $legacyType = $category ? \App\Enums\ProductType::tryFrom($category->slug) : null;
+        // Fallback to OTHER if no match
+        $legacyType = $legacyType ?? \App\Enums\ProductType::OTHER;
 
         Product::create([
             'name' => $this->name,
             'sku' => $this->sku,
-            'type' => $this->type,
+            'category_id' => $this->category_id,
+            'type' => $legacyType, // Legacy column
             'material' => $this->material ?: null,
             'description' => $this->description,
             'cost_price' => $this->cost_price,
@@ -84,13 +99,15 @@ class CreateProduct extends Component
             'photo' => $path,
         ]);
 
-        session()->flash('status', 'Product created successfully.');
+        notify()->success()->title('Success')->message('Product created successfully.')->send();
 
         return $this->redirect(route('products.index'), navigate: true);
     }
 
     public function render()
     {
-        return view('livewire.products.create-product');
+        return view('livewire.products.create-product', [
+            'categories' => \App\Models\Category::orderBy('name')->get(),
+        ]);
     }
 }

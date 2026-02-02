@@ -52,6 +52,15 @@ class ListExpenses extends Component
         }
     }
 
+    public function deleteExpense($id)
+    {
+        $expense = Expense::findOrFail($id);
+        $expense->delete();
+        notify()->success()->title('Success')->message('Expense deleted successfully.')->send();
+
+        return redirect()->route('expenses.index');
+    }
+
     public function render()
     {
         $expenses = Expense::query()

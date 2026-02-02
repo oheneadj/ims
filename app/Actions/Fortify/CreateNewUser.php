@@ -24,6 +24,8 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
+        notify()->success('Account successfully created! Welcome to IMS.');
+
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],

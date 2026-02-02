@@ -24,8 +24,8 @@ class EditProduct extends Component
     // SKU validation is special, handled in save()
     public string $sku = '';
 
-    #[Validate('required')]
-    public string $type = '';
+    #[Validate('required|exists:categories,id')]
+    public $category_id = '';
 
     #[Validate('nullable')]
     public string $material = '';
@@ -52,7 +52,7 @@ class EditProduct extends Component
         $this->product = $product;
         $this->name = $product->name;
         $this->sku = $product->sku;
-        $this->type = $product->type->value;
+        $this->category_id = $product->category_id;
         $this->material = $product->material?->value ?? '';
         $this->description = $product->description ?? '';
         $this->cost_price = $product->cost_price;
@@ -66,7 +66,7 @@ class EditProduct extends Component
         $this->validate([
             'sku' => 'required|unique:products,sku,'.$this->product->id,
             'name' => 'required|string|max:255',
-            'type' => 'required',
+            'category_id' => 'required|exists:categories,id',
             'material' => 'nullable',
             'description' => 'nullable|string',
             'cost_price' => 'required|numeric|min:0',
@@ -84,10 +84,16 @@ class EditProduct extends Component
             }
         }
 
+        // Backward compatibility: Determine legacy 'type' from category if possible
+        $category = \App\Models\Category::find($this->category_id);
+        $legacyType = $category ? \App\Enums\ProductType::tryFrom($category->slug) : null;
+        $legacyType = $legacyType ?? \App\Enums\ProductType::OTHER;
+
         $this->product->update([
             'name' => $this->name,
             'sku' => $this->sku,
-            'type' => $this->type,
+            'category_id' => $this->category_id,
+            'type' => $legacyType, // Legacy
             'material' => $this->material ?: null,
             'description' => $this->description,
             'cost_price' => $this->cost_price,
@@ -96,13 +102,15 @@ class EditProduct extends Component
             'photo' => $path,
         ]);
 
-        session()->flash('status', 'Product updated successfully.');
+        notify()->success()->title('Success')->message('Product updated successfully.')->send();
 
         return $this->redirect(route('products.index'), navigate: true);
     }
 
     public function render()
     {
-        return view('livewire.products.edit-product');
+        return view('livewire.products.edit-product', [
+            'categories' => \App\Models\Category::orderBy('name')->get(),
+        ]);
     }
 }

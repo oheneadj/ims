@@ -15,7 +15,8 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'type',
+        'category_id',
+        'type', // Keep for backward compatibility during migration, remove later
         'material',
         'description',
         'sku',
@@ -24,6 +25,11 @@ class Product extends Model
         'quantity_in_stock',
         'photo',
     ];
+
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     protected $casts = [
         'type' => ProductType::class,

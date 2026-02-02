@@ -15,10 +15,10 @@
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search products..."
                     class="input input-bordered w-1/3" />
 
-                <select wire:model.live="filterType" class="select select-bordered w-1/5">
-                    <option value="">All Types</option>
-                    @foreach($productTypes as $type)
-                        <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                <select wire:model.live="filterCategory" class="select select-bordered w-1/5">
+                    <option value="">All Categories</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
 
@@ -50,7 +50,7 @@
                                 </div>
                             </th>
                             <th>SKU</th>
-                            <th>Type</th>
+                            <th>Category</th>
                             <th wire:click="sortBy('selling_price')" class="cursor-pointer hover:bg-base-300">
                                 <div class="flex items-center gap-1">
                                     Price
@@ -95,8 +95,9 @@
                                 </td>
                                 <td class="font-mono text-sm">{{ $product->sku ?? '-' }}</td>
                                 <td>
-                                    <span
-                                        class="badge badge-soft badge-primary text-xs">{{ $product->type->label() }}</span>
+                                    <span class="badge badge-soft badge-primary text-xs">
+                                        {{ $product->category?->name ?? 'Uncategorized' }}
+                                    </span>
                                 </td>
                                 <td class="font-mono">₵{{ number_format($product->selling_price, 2) }}</td>
                                 <td>
@@ -119,6 +120,11 @@
                                             <span class="icon-[tabler--pencil] size-4"></span>
                                             Edit
                                         </a>
+                                        <button class="btn btn-error btn-sm" x-data
+                                            x-on:click="$dispatch('open-delete-modal', { id: {{ $product->id }}, name: '{{ addslashes($product->name) }}' })">
+                                            <span class="icon-[tabler--trash] size-4"></span>
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -173,4 +179,29 @@
             </div>
         </div>
     @endif
+
+    {{-- Delete Confirmation Modal --}}
+    <div x-data="{ open: false, id: null, name: '' }"
+        x-on:open-delete-modal.window="open = true; id = $event.detail.id; name = $event.detail.name" x-show="open"
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="card bg-base-100 w-full max-w-sm shadow-2xl scale-100 transform transition-transform">
+            <div class="card-body text-center">
+                <div class="flex justify-center mb-4 text-error">
+                    <span class="icon-[tabler--alert-circle] size-16"></span>
+                </div>
+                <h3 class="text-xl font-bold">Delete Product?</h3>
+                <p class="py-4 text-base-content/70">
+                    Are you sure you want to delete <span class="font-bold text-base-content" x-text="name"></span>?
+                    <br>This action cannot be undone.
+                </p>
+                <div class="card-actions justify-center gap-4">
+                    <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="open = false; $wire.deleteProduct(id)" class="btn btn-error text-white">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

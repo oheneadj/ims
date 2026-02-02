@@ -45,6 +45,12 @@ class CreatePayment extends Component
         $this->customerSearch = Customer::find($id)->name;
     }
 
+    public function clearCustomerSelection()
+    {
+        $this->customer_id = '';
+        $this->customerSearch = '';
+    }
+
     public function mount()
     {
         $this->payment_method = PaymentMethod::CASH->value;
@@ -106,7 +112,16 @@ class CreatePayment extends Component
 
     public function render()
     {
-        $customers = Customer::orderBy('name')->get();
+        $customers = collect();
+        
+        if (strlen($this->customerSearch) > 1) {
+            $customers = Customer::query()
+                ->where('name', 'like', '%' . $this->customerSearch . '%')
+                ->orWhere('phone', 'like', '%' . $this->customerSearch . '%')
+                ->orderBy('name')
+                ->take(10) // Limit results for performance
+                ->get();
+        }
         
         $customerSales = collect();
         $selectedCustomer = null;

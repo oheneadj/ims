@@ -37,6 +37,22 @@ class ListCustomers extends Component
         }
     }
 
+    public function deleteCustomer($id)
+    {
+        $customer = Customer::findOrFail($id);
+
+        // Check if customer has any sales
+        if ($customer->sales()->exists()) {
+            notify()->error()->title('Action Failed')->message('Cannot delete customer because they have sales history.')->send();
+            return;
+        }
+
+        $customer->delete();
+        notify()->success()->title('Success')->message('Customer deleted successfully.')->send();
+
+        return redirect()->route('customers.index');
+    }
+
     public function render()
     {
         $customers = Customer::query()

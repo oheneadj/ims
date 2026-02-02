@@ -8,8 +8,14 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('payments.index') }}" class="btn btn-ghost">Back to Payments</a>
-            <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+            <a href="{{ route('payments.index') }}" class="btn btn-ghost">Back</a>
+            <a href="{{ route('payments.edit', $payment->id) }}" class="btn btn-outline" title="Edit">
+                <span class="icon-[tabler--pencil] size-5"></span>
+            </a>
+            <button class="btn btn-outline" onclick="window.print()">Print</button>
+            <button class="btn btn-error btn-outline" x-data x-on:click="$dispatch('open-delete-modal')">
+                Delete
+            </button>
         </div>
     </div>
 
@@ -112,6 +118,30 @@
                     </div>
                 </div>
             @endif
+        </div>
+    </div>
+
+    {{-- Delete Confirmation Modal --}}
+    <div x-data="{ open: false }" x-on:open-delete-modal.window="open = true" x-show="open" style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="card bg-base-100 w-full max-w-sm shadow-2xl scale-100 transform transition-transform">
+            <div class="card-body text-center">
+                <div class="flex justify-center mb-4 text-error">
+                    <span class="icon-[tabler--alert-circle] size-16"></span>
+                </div>
+                <h3 class="text-xl font-bold">Delete Payment?</h3>
+                <p class="py-4 text-base-content/70">
+                    Are you sure you want to delete this payment of <span
+                        class="font-bold text-base-content">₵{{ number_format($payment->amount, 2) }}</span>?
+                    <br>This will adjust the linked sale balance.
+                </p>
+                <div class="card-actions justify-center gap-4">
+                    <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="open = false; $wire.deletePayment()" class="btn btn-error text-white">
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

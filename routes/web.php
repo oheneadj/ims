@@ -22,6 +22,8 @@ use App\Livewire\Customers\ShowCustomer;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products', ListProducts::class)->name('products.index');
+    Route::get('categories', \App\Livewire\Categories\ListCategories::class)->name('categories.index');
+    Route::get('users', \App\Livewire\Users\ListUsers::class)->name('users.index');
     Route::get('products/create', CreateProduct::class)->name('products.create');
     Route::get('products/{product}/edit', EditProduct::class)->name('products.edit');
 
@@ -40,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments', \App\Livewire\Payments\ListPayments::class)->name('payments.index');
     Route::get('payments/create', \App\Livewire\Payments\CreatePayment::class)->name('payments.create');
     Route::get('payments/{payment}', \App\Livewire\Payments\ShowPayment::class)->name('payments.show');
+    Route::get('payments/{payment}/edit', \App\Livewire\Payments\EditPayment::class)->name('payments.edit');
 
     Route::get('expenses', \App\Livewire\Expenses\ListExpenses::class)->name('expenses.index');
     Route::get('expenses/create', \App\Livewire\Expenses\CreateExpense::class)->name('expenses.create');

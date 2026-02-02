@@ -51,7 +51,7 @@ class CreateExpense extends Component
             'user_id' => auth()->id(), // Assuming user is logged in
         ]);
 
-        session()->flash('status', 'Expense recorded successfully.');
+        notify()->success('Expense recorded successfully.');
 
         return $this->redirect(route('expenses.index'), navigate: true);
     }

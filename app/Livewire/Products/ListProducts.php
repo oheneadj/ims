@@ -16,7 +16,7 @@ class ListProducts extends Component
     public string $search = '';
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
-    public string $filterType = '';
+    public string $filterCategory = '';
     public string $filterStock = '';
 
     public function updatedSearch()
@@ -24,7 +24,7 @@ class ListProducts extends Component
         $this->resetPage();
     }
 
-    public function updatedFilterType()
+    public function updatedFilterCategory()
     {
         $this->resetPage();
     }
@@ -63,37 +63,43 @@ class ListProducts extends Component
         $this->reset(['selectedProductId', 'restockQuantity', 'restockNotes']);
     }
 
-    public function saveRestock()
+    public function restock()
     {
         $this->validate([
-            'selectedProductId' => 'required|exists:products,id',
             'restockQuantity' => 'required|integer|min:1',
-            'restockNotes' => 'nullable|string|max:255',
         ]);
 
         $product = Product::find($this->selectedProductId);
-        
-        // Update Stock
-        $product->increment('quantity_in_stock', $this->restockQuantity);
-
-        // Record Movement
-        \App\Models\StockMovement::create([
-            'product_id' => $product->id,
-            'type' => 'adjustment',
-            'quantity' => $this->restockQuantity,
-            'reference' => $this->restockNotes ?: 'Manual Restock',
-        ]);
+        if ($product) {
+            $product->increment('quantity_in_stock', $this->restockQuantity);
+            notify()->success()->title('Success')->message("Restocked {$product->name} by {$this->restockQuantity}.")->send();
+        }
 
         $this->closeRestockModal();
-        session()->flash('status', 'Stock updated successfully.');
+    }
+
+    public function deleteProduct($id)
+    {
+        $product = Product::findOrFail($id);
+
+        if ($product->saleItems()->exists()) {
+            notify()->error()->title('Action Failed')->message('Cannot delete product because it has associated sales history.')->send();
+            return;
+        }
+
+        $product->delete();
+        notify()->success()->title('Success')->message('Product deleted successfully.')->send();
+
+        return redirect()->route('products.index');
     }
 
     public function render()
     {
         $products = Product::query()
+            ->with(['category'])
             ->when($this->search, fn($q) => $q->where('name', 'like', '%'.$this->search.'%')
                 ->orWhere('sku', 'like', '%'.$this->search.'%'))
-            ->when($this->filterType, fn($q) => $q->where('type', $this->filterType))
+            ->when($this->filterCategory, fn($q) => $q->where('category_id', $this->filterCategory))
             ->when($this->filterStock === 'low', fn($q) => $q->where('quantity_in_stock', '<=', 5))
             ->when($this->filterStock === 'out', fn($q) => $q->where('quantity_in_stock', '=', 0))
             ->when($this->filterStock === 'in', fn($q) => $q->where('quantity_in_stock', '>', 5))
@@ -102,7 +108,7 @@ class ListProducts extends Component
 
         return view('livewire.products.list-products', [
             'products' => $products,
-            'productTypes' => ProductType::cases(),
+            'categories' => \App\Models\Category::orderBy('name')->get(),
         ]);
     }
 }

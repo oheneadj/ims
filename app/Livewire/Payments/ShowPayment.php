@@ -16,6 +16,15 @@ class ShowPayment extends Component
         $this->payment = $payment->load(['customer', 'sale']);
     }
 
+    public function deletePayment()
+    {
+        $this->payment->delete(); // Observer handles side effects
+        
+        notify()->success()->title('Success')->message('Payment deleted successfully.')->send();
+
+        return $this->redirect(route('payments.index'), navigate: true);
+    }
+
     public function render()
     {
         return view('livewire.payments.show-payment');

@@ -71,6 +71,16 @@
                             @endif
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('categories.index') }}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                            {{ request()->routeIs('categories.*')
+    ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50'
+    : 'text-brand-200 hover:bg-brand-900/50 hover:text-white' }}">
+                            <span
+                                class="icon-[tabler--category] size-5 {{ request()->routeIs('categories.*') ? '' : 'group-hover:scale-110' }} transition-transform"></span>
+                            <span class="font-medium">Categories</span>
+                        </a>
+                    </li>
 
                     {{-- Commercial Section --}}
                     <li class="mt-6 mb-2">
@@ -137,6 +147,24 @@
                             <span
                                 class="icon-[tabler--receipt] size-5 {{ request()->routeIs('expenses.*') ? '' : 'group-hover:scale-110' }} transition-transform"></span>
                             <span class="font-medium">Expenses</span>
+                        </a>
+                    </li>
+                    </li>
+
+                    {{-- System Section --}}
+                    <li class="mt-6 mb-2">
+                        <span class="text-[0.65rem] font-bold uppercase tracking-widest text-brand-400/50 px-4">
+                            System
+                        </span>
+                    </li>
+                    <li>
+                        <a href="{{ route('users.index') }}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                            {{ request()->routeIs('users.*')
+    ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50'
+    : 'text-brand-200 hover:bg-brand-900/50 hover:text-white' }}">
+                            <span
+                                class="icon-[tabler--user-cog] size-5 {{ request()->routeIs('users.*') ? '' : 'group-hover:scale-110' }} transition-transform"></span>
+                            <span class="font-medium">Users</span>
                         </a>
                     </li>
                 </ul>

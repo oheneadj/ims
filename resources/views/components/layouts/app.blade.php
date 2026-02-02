@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @notifyCss
 </head>
 
 <body class="font-sans antialiased text-base-content bg-gray-100" x-data="{}">
@@ -18,7 +19,8 @@
             @include('components.layouts.topbar', ['header' => $header ?? null])
 
             <!-- Main Content -->
-            <main class="w-full grow p-6 pb-24 lg:pb-6">
+            <main class="w-full grow p-6 pb-24 lg:pb-6 relative">
+                <x-notify::notify />
                 {{ $slot }}
             </main>
         </div>
@@ -30,6 +32,7 @@
     @stack('modals')
     @stack('scripts')
     @livewireScripts
+    @notifyJs
     <script>
         // FilePond plugin registration is handled in app.js
     </script>

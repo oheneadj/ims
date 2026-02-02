@@ -17,6 +17,8 @@ class Logout
         Session::invalidate();
         Session::regenerateToken();
 
+        notify()->success('You have been logged out securely.');
+
         return redirect('/');
     }
 }

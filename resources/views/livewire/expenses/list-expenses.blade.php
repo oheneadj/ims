@@ -73,10 +73,15 @@
                                     {{ $expense->reference_number ?? '-' }}
                                 </td>
                                 <td>
-                                    <button wire:click="viewExpense({{ $expense->id }})" class="btn btn-primary btn-sm">
-                                        <span class="icon-[tabler--eye] size-4"></span>
-                                        View
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button wire:click="viewExpense({{ $expense->id }})" class="btn btn-primary btn-sm">
+                                            <span class="icon-[tabler--eye] size-4"></span>
+                                        </button>
+                                        <button class="btn btn-error btn-sm" x-data
+                                            x-on:click="$dispatch('open-delete-modal', { id: {{ $expense->id }}, name: '{{ addslashes($expense->description) }}' })">
+                                            <span class="icon-[tabler--trash] size-4"></span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -145,4 +150,29 @@
             </div>
         </div>
     @endif
+
+    {{-- Delete Confirmation Modal --}}
+    <div x-data="{ open: false, id: null, name: '' }"
+        x-on:open-delete-modal.window="open = true; id = $event.detail.id; name = $event.detail.name" x-show="open"
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="card bg-base-100 w-full max-w-sm shadow-2xl scale-100 transform transition-transform">
+            <div class="card-body text-center">
+                <div class="flex justify-center mb-4 text-error">
+                    <span class="icon-[tabler--alert-circle] size-16"></span>
+                </div>
+                <h3 class="text-xl font-bold">Delete Expense?</h3>
+                <p class="py-4 text-base-content/70">
+                    Are you sure you want to delete <span class="font-bold text-base-content" x-text="name"></span>?
+                    <br>This action cannot be undone.
+                </p>
+                <div class="card-actions justify-center gap-4">
+                    <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="open = false; $wire.deleteExpense(id)" class="btn btn-error text-white">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

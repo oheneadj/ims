@@ -38,6 +38,16 @@ class ListPayments extends Component
         }
     }
 
+    public function deletePayment($id)
+    {
+        $payment = Payment::findOrFail($id);
+        $payment->delete(); // Observer handles Side Effects (Sale balance, Customer balance)
+        
+        notify()->success()->title('Success')->message('Payment deleted successfully.')->send();
+
+        return redirect()->route('payments.index');
+    }
+
     public function render()
     {
         $payments = Payment::query()

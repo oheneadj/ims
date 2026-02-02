@@ -84,10 +84,23 @@
                                     ₵{{ number_format($sale->amount_paid, 2) }}
                                 </td>
                                 <td>
-                                    <a href="{{ route('sales.show', $sale) }}" class="btn btn-primary btn-sm">
-                                        <span class="icon-[tabler--eye] size-4"></span>
-                                        View
-                                    </a>
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('sales.show', $sale) }}" class="btn btn-primary btn-sm">
+                                            <span class="icon-[tabler--eye] size-4"></span>
+                                        </a>
+
+                                        @if($sale->payment_status->value !== 'paid')
+                                            <button wire:click="sendReminder({{ $sale->id }})" class="btn btn-warning btn-sm"
+                                                title="Send Payment Reminder">
+                                                <span class="icon-[tabler--bell-ringing] size-4"></span>
+                                            </button>
+                                        @endif
+
+                                        <button class="btn btn-error btn-sm" x-data
+                                            x-on:click="$dispatch('open-delete-modal', { id: {{ $sale->id }}, name: 'Sale #IDDL-{{ $sale->id }}' })">
+                                            <span class="icon-[tabler--trash] size-4"></span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -107,4 +120,29 @@
     @if($sales->hasPages())
         {{ $sales->links() }}
     @endif
+
+    {{-- Delete Confirmation Modal --}}
+    <div x-data="{ open: false, id: null, name: '' }"
+        x-on:open-delete-modal.window="open = true; id = $event.detail.id; name = $event.detail.name" x-show="open"
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="card bg-base-100 w-full max-w-sm shadow-2xl scale-100 transform transition-transform">
+            <div class="card-body text-center">
+                <div class="flex justify-center mb-4 text-error">
+                    <span class="icon-[tabler--alert-circle] size-16"></span>
+                </div>
+                <h3 class="text-xl font-bold">Delete Sale Record?</h3>
+                <p class="py-4 text-base-content/70">
+                    Are you sure you want to delete <span class="font-bold text-base-content" x-text="name"></span>?
+                    <br>This action cannot be undone.
+                </p>
+                <div class="card-actions justify-center gap-4">
+                    <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="open = false; $wire.deleteSale(id)" class="btn btn-error text-white">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

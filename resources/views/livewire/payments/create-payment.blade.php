@@ -28,7 +28,7 @@
                                 <div class="input input-bordered w-full flex items-center bg-base-200">
                                     {{ $customers->firstWhere('id', $customer_id)->name ?? $customerSearch }}
                                 </div>
-                                <button type="button" wire:click="$set('customer_id', '')" class="btn btn-square btn-outline">
+                                <button type="button" wire:click="clearCustomerSelection" class="btn btn-square btn-outline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                              </div>
@@ -42,9 +42,7 @@
                             @if(strlen($customerSearch) > 1)
                                 <ul class="menu bg-base-100 w-full rounded-box shadow-lg border border-base-200 absolute top-full left-0 z-50 mt-1 max-h-60 overflow-y-auto">
                                     @forelse($customers as $c)
-                                        @if(stripos($c->name, $customerSearch) !== false)
-                                            <li><a wire:click="selectCustomer({{ $c->id }})">{{ $c->name }} <span class="text-xs opacity-50">({{ $c->phone }})</span></a></li>
-                                        @endif
+                                        <li><a wire:click="selectCustomer({{ $c->id }})">{{ $c->name }} <span class="text-xs opacity-50">({{ $c->phone }})</span></a></li>
                                     @empty
                                         <li class="disabled"><a>No customers found</a></li>
                                     @endforelse

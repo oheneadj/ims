@@ -27,14 +27,16 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 {{-- Type Enum --}}
+                {{-- Category Select --}}
                 <div class="form-control">
-                    <label class="label"><span class="label-text">Type</span></label>
-                    <select wire:model="type" class="select select-bordered w-full">
-                        @foreach(\App\Enums\ProductType::cases() as $type)
-                            <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                    <label class="label"><span class="label-text">Category</span></label>
+                    <select wire:model.live="category_id" class="select select-bordered w-full">
+                        <option value="">Select Category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
-                    @error('type') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
+                    @error('category_id') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
 
                 {{-- Material Enum --}}

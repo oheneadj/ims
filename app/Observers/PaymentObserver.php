@@ -28,6 +28,36 @@ class PaymentObserver
         }
     }
 
+    public function updated(Payment $payment): void
+    {
+        // Handle Amount Changes
+        if ($payment->isDirty('amount')) {
+            $diff = $payment->amount - $payment->getOriginal('amount');
+
+            // Adjust Customer Balance (If I pay more, balance decreases further)
+            if ($payment->customer_id) {
+                $payment->customer->decrement('current_balance', $diff);
+            }
+
+            // Adjust Sale Amount Paid
+            if ($payment->sale_id && $payment->sale) {
+                $sale = $payment->sale;
+                $sale->increment('amount_paid', $diff);
+
+                // Update status
+                if ($sale->amount_paid <= 0) {
+                     // Fix potential float issues
+                     if ($sale->amount_paid < 0) $sale->update(['amount_paid' => 0]);
+                     $sale->update(['payment_status' => PaymentStatus::CREDIT]);
+                } elseif ($sale->amount_paid < $sale->total_amount) {
+                    $sale->update(['payment_status' => PaymentStatus::PARTIAL]);
+                } else {
+                    $sale->update(['payment_status' => PaymentStatus::PAID]);
+                }
+            }
+        }
+    }
+
     public function deleted(Payment $payment): void
     {
         // Revert balance

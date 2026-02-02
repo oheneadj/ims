@@ -82,10 +82,18 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('payments.show', $payment->id) }}" class="btn btn-primary btn-sm">
-                                        <span class="icon-[tabler--eye] size-4"></span>
-                                        View
-                                    </a>
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('payments.show', $payment->id) }}" class="btn btn-primary btn-sm">
+                                            <span class="icon-[tabler--eye] size-4"></span>
+                                        </a>
+                                        <a href="{{ route('payments.edit', $payment->id) }}" class="btn btn-ghost btn-sm">
+                                            <span class="icon-[tabler--pencil] size-4"></span>
+                                        </a>
+                                        <button class="btn btn-error btn-sm" x-data
+                                            x-on:click="$dispatch('open-delete-modal', { id: {{ $payment->id }}, amount: '{{ number_format($payment->amount, 2) }}' })">
+                                            <span class="icon-[tabler--trash] size-4"></span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -105,4 +113,30 @@
     @if($payments->hasPages())
         {{ $payments->links() }}
     @endif
+
+    {{-- Delete Confirmation Modal --}}
+    <div x-data="{ open: false, id: null, amount: '' }"
+        x-on:open-delete-modal.window="open = true; id = $event.detail.id; amount = $event.detail.amount" x-show="open"
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="card bg-base-100 w-full max-w-sm shadow-2xl scale-100 transform transition-transform">
+            <div class="card-body text-center">
+                <div class="flex justify-center mb-4 text-error">
+                    <span class="icon-[tabler--alert-circle] size-16"></span>
+                </div>
+                <h3 class="text-xl font-bold">Delete Payment?</h3>
+                <p class="py-4 text-base-content/70">
+                    Are you sure you want to delete the payment of <span class="font-bold text-base-content">₵<span
+                            x-text="amount"></span></span>?
+                    <br>This will adjust the linked sale balance.
+                </p>
+                <div class="card-actions justify-center gap-4">
+                    <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="open = false; $wire.deletePayment(id)" class="btn btn-error text-white">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
