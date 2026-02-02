@@ -25,9 +25,15 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        if (app()->isProduction()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
         \App\Models\SaleItem::observe(\App\Observers\SaleItemObserver::class);
         \App\Models\Sale::observe(\App\Observers\SaleObserver::class);
+        
+        \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\LogAuthentication::class);
     }
 
     protected function configureDefaults(): void

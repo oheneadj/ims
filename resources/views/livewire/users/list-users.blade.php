@@ -46,6 +46,7 @@
                                     @endif
                                 </div>
                             </th>
+                            <th class="w-24">Role</th>
                             <th wire:click="sortBy('created_at')" class="cursor-pointer hover:bg-base-300">
                                 <div class="flex items-center gap-1">
                                     Joined
@@ -72,6 +73,13 @@
                                     </div>
                                 </td>
                                 <td>{{ $user->email }}</td>
+                                <td>
+                                    @if($user->hasRole('super_admin'))
+                                        <span class="badge badge-primary badge-sm font-bold">Admin</span>
+                                    @else
+                                        <span class="badge badge-ghost badge-sm">User</span>
+                                    @endif
+                                </td>
                                 <td class="text-sm opacity-70">{{ $user->created_at->format('M d, Y') }}</td>
                                 <td>
                                     <div class="flex gap-1">
@@ -97,7 +105,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-10 opacity-50">
+                                <td colspan="5" class="text-center py-10 opacity-50">
                                     No users found.
                                 </td>
                             </tr>
@@ -137,6 +145,19 @@
                             <input wire:model="email" type="email"
                                 class="input input-bordered w-full @error('email') input-error @enderror" />
                             @error('email') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text font-medium">Role</span>
+                            </label>
+                            <select wire:model="role"
+                                class="select select-bordered w-full @error('role') select-error @enderror">
+                                @foreach($roles as $r)
+                                    <option value="{{ $r->name }}">{{ ucwords(str_replace('_', ' ', $r->name)) }}</option>
+                                @endforeach
+                            </select>
+                            @error('role') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="form-control w-full mb-4">

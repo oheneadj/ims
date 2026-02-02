@@ -24,6 +24,7 @@ class ListUsers extends Component
 
     public string $name = '';
     public string $email = '';
+    public string $role = 'user'; // Default role
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -35,7 +36,8 @@ class ListUsers extends Component
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['name', 'email', 'password', 'password_confirmation', 'editingUserId', 'isEditing']);
+        $this->reset(['name', 'email', 'password', 'password_confirmation', 'role', 'editingUserId', 'isEditing']);
+        $this->role = 'user'; // Ensure default
         $this->showModal = true;
     }
 
@@ -44,14 +46,17 @@ class ListUsers extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'role' => 'required|exists:roles,name',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
         ]);
+
+        $user->assignRole($this->role);
 
         $this->showModal = false;
         notify()->success()->title('Success')->message('User created successfully.')->send();
@@ -65,6 +70,7 @@ class ListUsers extends Component
         $this->editingUserId = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->role = $user->roles->first()?->name ?? 'user';
         $this->password = '';
         $this->password_confirmation = '';
         $this->isEditing = true;
@@ -76,6 +82,7 @@ class ListUsers extends Component
         $rules = [
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->editingUserId)],
+            'role' => 'required|exists:roles,name',
         ];
 
         // Only validate password if provided
@@ -97,6 +104,7 @@ class ListUsers extends Component
         }
 
         $user->update($data);
+        $user->syncRoles([$this->role]);
 
         $this->showModal = false;
         notify()->success()->title('Success')->message('User updated successfully.')->send();
@@ -132,13 +140,17 @@ class ListUsers extends Component
     public function render()
     {
         $users = User::query()
+            ->with('roles') // Eager load roles
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%')
                 ->orWhere('email', 'like', '%' . $this->search . '%'))
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(10);
+            
+        $roles = \Spatie\Permission\Models\Role::all();
 
         return view('livewire.users.list-users', [
             'users' => $users,
+            'roles' => $roles,
         ]);
     }
 }

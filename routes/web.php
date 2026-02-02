@@ -23,7 +23,10 @@ use App\Livewire\Customers\ShowCustomer;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products', ListProducts::class)->name('products.index');
     Route::get('categories', \App\Livewire\Categories\ListCategories::class)->name('categories.index');
-    Route::get('users', \App\Livewire\Users\ListUsers::class)->name('users.index');
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('users', \App\Livewire\Users\ListUsers::class)->name('users.index');
+        Route::get('activities', \App\Livewire\System\ListActivities::class)->name('system.activities');
+    });
     Route::get('products/create', CreateProduct::class)->name('products.create');
     Route::get('products/{product}/edit', EditProduct::class)->name('products.edit');
 
