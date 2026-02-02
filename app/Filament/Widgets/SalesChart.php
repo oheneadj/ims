@@ -38,8 +38,8 @@ class SalesChart extends ChartWidget
         $data = \App\Models\Sale::query()
             ->selectRaw('DATE(sale_date) as date, SUM(total_amount) as total')
             ->whereBetween('sale_date', [$startDate, $endDate])
-            ->groupBy('date')
-            ->orderBy('date')
+            ->groupByRaw('DATE(sale_date)')
+            ->orderByRaw('DATE(sale_date)')
             ->get()
             ->pluck('total', 'date');
 
